@@ -1,6 +1,6 @@
 import gym
 from optical_rl_gym.envs.rmcsa_env import shortest_path_first_fit, shortest_available_first_core_first_fit, \
-    least_loaded_path_first_fit, SimpleMatrixObservation
+    least_loaded_path_first_fit, SimpleMatrixObservation, CoreAllocation
 from optical_rl_gym.utils import evaluate_heuristic, random_policy
 
 import pickle
@@ -40,7 +40,8 @@ env_args = dict(topology=topology, seed=10, allow_rejection=True, load=load, mea
 # print(init_env.topology.graph['throughput'])
 
 env_sap = gym.make('RMCSA-v0', **env_args)
-mean_reward_sap, std_reward_sap = evaluate_heuristic(env_sap, shortest_available_first_core_first_fit, n_eval_episodes=episodes)
+core_alloc = CoreAllocation(env_sap)
+mean_reward_sap, std_reward_sap = evaluate_heuristic(env_sap, core_alloc.slot_based, n_eval_episodes=episodes)
 
 # Initial Metrics for Environment
 print('SAP-FF:'.ljust(8), f'{mean_reward_sap:.4f}  {std_reward_sap:.4f}')
