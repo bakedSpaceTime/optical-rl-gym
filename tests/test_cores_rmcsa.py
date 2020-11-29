@@ -42,10 +42,10 @@ env_args = dict(topology=topology, seed=10, allow_rejection=True, load=load, mea
 
 env_sap = gym.make('RMCSA-v0', **env_args)
 core_alloc = CoreAllocation(env_sap)
-mean_reward_sap, std_reward_sap = evaluate_heuristic(env_sap, core_alloc.slot_based, n_eval_episodes=episodes)
+mean_reward_sap, std_reward_sap = evaluate_heuristic(env_sap, core_alloc.slot_based_round_robin, n_eval_episodes=episodes)
 
 # Initial Metrics for Environment
-print('SAP-FF:'.ljust(8), f'{mean_reward_sap:.4f}  {std_reward_sap:.4f}')
+print('FP-RR:'.ljust(8), f'{mean_reward_sap:.4f}  {std_reward_sap:.4f}')
 print('Bit rate blocking:', (env_sap.episode_bit_rate_requested - env_sap.episode_bit_rate_provisioned) / env_sap.episode_bit_rate_requested)
 print('Request blocking:', (env_sap.episode_services_processed - env_sap.episode_services_accepted) / env_sap.episode_services_processed)
 

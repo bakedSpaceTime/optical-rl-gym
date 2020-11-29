@@ -21,7 +21,7 @@ class RMCSAEnv(OpticalNetworkEnv):
 
     def __init__(self, topology=None,
                  episode_length=1000,
-                 load=10,
+                 load=250,
                  mean_service_holding_time=10800.0,
                  num_spectrum_resources=100,
                  num_spatial_resources=3,  # number of cores - 3, 7, 11, 22
