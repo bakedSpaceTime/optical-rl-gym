@@ -92,9 +92,9 @@ class CoreAllocation():
                     if self.env.is_path_free(core, path, slot, num_slots):
                         self.last_allocated_core = core
                         # print([core, path_index, slot, slot_usage])
-                        print([core, path_index, slot], "connection made")
+                        # print([core, path_index, slot], "connection made")
                         return [core, path_index, slot]
-        print("no connection made")
+        # print("no connection made")
         self.last_allocated_core = env.num_spatial_resources - 1
         return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]    
 
@@ -121,7 +121,9 @@ class CoreAllocation():
             for path_index, path in enumerate(self.env.k_shortest_paths[self.env.service.source, self.env.service.destination]):
                 cur_used = self._used_slots(cur_core, path)
                 num_False = [ slot[1] for slot in cur_used ].count(False)
-                slot_usage.append((cur_core, path_index, num_False))
+                num_FalsePerLink = num_False / (len(path.node_list) - 1)
+                slot_usage_avg = num_FalsePerLink / self.env.num_spectrum_resources
+                slot_usage.append((cur_core, path_index, slot_usage_avg))
 
         # print(sorted(slot_usage, key=lambda tup: tup[2]))
         return sorted(slot_usage, key=lambda tup: tup[2])
