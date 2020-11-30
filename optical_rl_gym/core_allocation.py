@@ -4,6 +4,10 @@ from optical_rl_gym.envs.rmcsa_env import RMCSAEnv
 
 class CoreAllocation():
 
+    LOWER_USAGE =.25
+    MIDDLE_USAGE = .50
+    UPPER_USAGE = .75
+
     def __init__(self, env: RMCSAEnv):
         self.env = env
         self._last_allocated_core = -1
@@ -98,6 +102,15 @@ class CoreAllocation():
         self.last_allocated_core = env.num_spatial_resources - 1
         return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]    
 
+    def slot_based_round_robin2(self, env: RMCSAEnv):
+        for core_set in self._choose_usage_limit_cores():
+            core, path_index = core_set[0], core_set[1]
+            path = self._path_from_index(path_index)
+            num_slots = self.env.get_number_slots(path)
+            for slot in range(self.env.num_spectrum_resources):
+                if self.env.is_path_free(core, path, slot, num_slots):
+                    return (core, path_index, slot)
+        return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]
 
     def _slot_usage(self, core: int, path: Path) -> [float]:
         cur_used = self._used_slots(core, path)
@@ -107,7 +120,45 @@ class CoreAllocation():
         true_slot_usage = 1 - slot_usage
         return true_slot_usage
 
+    def _choose_usage_limit_cores(self):
+        core_lists = [
+            self._lower_usage_cores(),
+            self._middle_usage_cores(),
+            self._upper_usage_cores(),
+        ]
+        # print(core_lists)
+        min_len = float('inf')
+        min_list = []
+        for core_list in core_lists:
+            if 0 < len(core_list) < min_len:
+                min_list = core_list
+        # print(min_list)
+        return min_list
+
+    def _lower_usage_cores(self):
+        lower_usage_core_sets = []
+        for core_set in self._cores_ordered_by_slots_used():
+            # print(core_set)
+            if core_set[2] <= self.LOWER_USAGE:
+                lower_usage_core_sets.append(core_set)
         
+        return lower_usage_core_sets
+    
+    def _middle_usage_cores(self):
+        middle_usage_cores = []
+        for core_set in self._cores_ordered_by_slots_used():
+            if self.LOWER_USAGE < core_set[2] < self.UPPER_USAGE:
+                middle_usage_cores.append(core_set)
+        
+        return middle_usage_cores
+    
+    def _upper_usage_cores(self):
+        upper_usage_cores = []
+        for core_set in self._cores_ordered_by_slots_used():
+            if core_set[2] >= self.UPPER_USAGE:
+                upper_usage_cores.append(core_set)
+        
+        return upper_usage_cores
 
     def _rr_core_range_list(self) -> [int]:
         return list(range(self.last_allocated_core + 1, self.env.num_spatial_resources)) + list(range(self.last_allocated_core + 1))
@@ -125,7 +176,7 @@ class CoreAllocation():
                 slot_usage_avg = num_FalsePerLink / self.env.num_spectrum_resources
                 slot_usage.append((cur_core, path_index, slot_usage_avg))
 
-        # print(sorted(slot_usage, key=lambda tup: tup[2]))
+        # print(sorted(slot_usage, key=lambda tup: tup[2]), len (slot_usage))
         return sorted(slot_usage, key=lambda tup: tup[2])
                 
     def _used_slots(self, core: int, path: Path) -> [(int,bool)]:
