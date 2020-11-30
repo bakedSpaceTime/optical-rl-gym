@@ -8,17 +8,42 @@ class CoreAllocation():
     MIDDLE_USAGE = .50
     UPPER_USAGE = .75
 
-    def __init__(self, env: RMCSAEnv):
+    HEURISTIC_NAMES = [
+        "round-robin",
+        "slot-based-round-robin",
+        "slot-based-round-robin2",
+        "slot-based",
+    ]
+
+    def __init__(self, env: RMCSAEnv, heuristic:str):
         self.env = env
         self._last_allocated_core = -1
         self._core_usage_lower = .25
         self._core_usage_middle = .50
         self._core_usage_upper = .75
 
+        self.default_allocation = 0
+        
+        self.HEURISTICS = {
+            "round-robin": self.round_robin,
+            "slot-based-round-robin": self.slot_based_round_robin,
+            "slot-based-round-robin2": self.slot_based_round_robin2,
+            "slot-based": self.slot_based,
+        }
+
+        if heuristic not in self.HEURISTICS.keys():
+            raise ValueError(f"Heuristic must be in {self.HEURISTICS.keys()}")
+        else:
+            self._heuristic = heuristic
+
     @property
     def last_allocated_core(self):
         return self._last_allocated_core
 
+    @property
+    def heuristic(self):
+        return self.HEURISTICS.get(self._heuristic, self.slot_based)
+    
     @last_allocated_core.setter
     def last_allocated_core(self, core_num):
         if core_num not in range(self.env.num_spatial_resources):
@@ -37,6 +62,7 @@ class CoreAllocation():
                         return [cur_core, path_index, slot]
         
         self.last_allocated_core = env.num_spatial_resources - 1
+        self.default_allocation += 1
         return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]
 
     def slot_based(self, env: RMCSAEnv):
@@ -47,6 +73,7 @@ class CoreAllocation():
                 num_slots = self.env.get_number_slots(path)
                 if self.env.is_path_free(core, path, slot, num_slots):
                     return (core, path_index, slot)
+        self.default_allocation += 1
         return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]
     
     def slot_based_round_robin(self, env: RMCSAEnv):
@@ -100,6 +127,7 @@ class CoreAllocation():
                         return [core, path_index, slot]
         # print("no connection made")
         self.last_allocated_core = env.num_spatial_resources - 1
+        self.default_allocation += 1
         return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]    
 
     def slot_based_round_robin2(self, env: RMCSAEnv):
@@ -110,6 +138,7 @@ class CoreAllocation():
             for slot in range(self.env.num_spectrum_resources):
                 if self.env.is_path_free(core, path, slot, num_slots):
                     return (core, path_index, slot)
+        self.default_allocation += 1
         return [self.env.num_spatial_resources, self.env.topology.graph['k_paths'], self.env.topology.graph['num_spectrum_resources']]
 
     def _slot_usage(self, core: int, path: Path) -> [float]:
@@ -126,7 +155,7 @@ class CoreAllocation():
             self._middle_usage_cores(),
             self._upper_usage_cores(),
         ]
-        # print(core_lists)
+        
         min_len = float('inf')
         min_list = []
         for core_list in core_lists:
