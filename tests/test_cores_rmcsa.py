@@ -41,8 +41,8 @@ env_args = dict(topology=topology, seed=10, allow_rejection=True, load=load, mea
 # print(init_env.topology.graph['throughput'])
 
 env_sap = gym.make('RMCSA-v0', **env_args)
-core_alloc = CoreAllocation(env_sap)
-mean_reward_sap, std_reward_sap = evaluate_heuristic(env_sap, core_alloc.slot_based_round_robin, n_eval_episodes=episodes)
+core_alloc = CoreAllocation(env_sap,'round-robin')
+mean_reward_sap, std_reward_sap = evaluate_heuristic(env_sap, core_alloc.heuristic, n_eval_episodes=episodes)
 
 # Initial Metrics for Environment
 print('FP-RR:'.ljust(8), f'{mean_reward_sap:.4f}  {std_reward_sap:.4f}')
@@ -55,6 +55,7 @@ print('Compactness:', env_sap.topology.graph['compactness'])
 print('Resource Utilization:', np.mean(env_sap.utilization))
 for key, value in env_sap.core_utilization.items():
     print('Utilization per core ({}): {}'.format(key, np.mean(env_sap.core_utilization[key])))
+print('Default Core Allocations:', core_alloc.default_allocation)
 
 """
 #Specific - modify
