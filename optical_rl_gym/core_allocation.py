@@ -126,7 +126,7 @@ class CoreAllocation():
         # print(sorted(slot_usage, key=lambda tup: tup[2]))
         return sorted(slot_usage, key=lambda tup: tup[2])
                 
-    def _used_slots(self, core: int, path: Path) -> [bool]:
+    def _used_slots(self, core: int, path: Path) -> [(int,bool)]:
         used_slots = []
         for i in range(len(path.node_list) - 1):
             for slot_num in range(self.env.num_spectrum_resources):
