@@ -23,8 +23,8 @@ EPISODES = 10
 EPISODE_LENGTH = 1000 ########
 NUM_SPATIAL_RESOURCES = 5
 NUM_SPECTRUM_RESOURCES = 64
-SPACIAL_RESOURCE_TEST_RANGE = range(3, 10) # Increase to range(3, 13)
-LOAD_TEST_RANGE = range(100, 1500, 100) # Increase to range(100, 2500, 200)
+SPATIAL_RESOURCE_TEST_RANGE = range(3, 10) # Increase to range(3, 15) 
+LOAD_TEST_RANGE = range(100, 1500, 100) # Increase to range(400, 2700, 200) -> keeps same number of data points
 TOPOLOGY_FILE_NAMES = {
     'default': '../examples/topologies/nsfnet_chen_eon_5-paths.h5',
     'germany': '../examples/topologies/germany50_eon_gnpy_5-paths.h5',
@@ -64,15 +64,15 @@ def display_metrics(test_variable, mean_reward_sap, std_reward_sap, env_sap, cor
 
 def json_file_dump(test_variable, mean_reward_sap, std_reward_sap, env_sap, core_alloc, file_name=DEFAULT_OUT_FILE, **kwargs):
     data = {
-        'FP-RR:': f'{mean_reward_sap:.4f}  {std_reward_sap:.4f}',
-        'Bit rate blocking:': (env_sap.episode_bit_rate_requested - env_sap.episode_bit_rate_provisioned) / env_sap.episode_bit_rate_requested,
-        'Request blocking:': (env_sap.episode_services_processed - env_sap.episode_services_accepted) / env_sap.episode_services_processed,
-        'Throughput:': env_sap.topology.graph['throughput'],
-        'Resource Utilization:': np.mean(env_sap.utilization),
+        'FP-RR': f'{mean_reward_sap:.4f}  {std_reward_sap:.4f}',
+        'Bit rate blocking': (env_sap.episode_bit_rate_requested - env_sap.episode_bit_rate_provisioned) / env_sap.episode_bit_rate_requested,
+        'Request blocking': (env_sap.episode_services_processed - env_sap.episode_services_accepted) / env_sap.episode_services_processed,
+        'Throughput': env_sap.topology.graph['throughput'],
+        'Resource Utilization': np.mean(env_sap.utilization),
         'Utilization per core': { key: np.mean(env_sap.core_utilization[key]) for key, value in env_sap.core_utilization.items() },
-        'Default Core Allocations:': core_alloc.default_allocation,
-        'Core Allocation Algorithm:': core_alloc._heuristic,
-        'Test Variable: ': test_variable,
+        'Default Core Allocations': core_alloc.default_allocation,
+        'Core Allocation Algorithm': core_alloc._heuristic,
+        'Test Variable': test_variable,
         'Other Details': kwargs,
     }
 
@@ -84,14 +84,14 @@ def json_file_dump(test_variable, mean_reward_sap, std_reward_sap, env_sap, core
 
 
 def alter_spatial_resources(core_alloc_algorithm):
-    test_var = 'Spacial Resources'
+    test_var = 'Spatial Resources'
     with open(DEFAULT_OUT_FILE, 'r') as f:
         file_data = json.load(f)
     file_data[core_alloc_algorithm][test_var] = []
     with open(DEFAULT_OUT_FILE, 'w') as f:
         json.dump(file_data, f, indent=4)
     
-    for num_spatial_resources in SPACIAL_RESOURCE_TEST_RANGE:
+    for num_spatial_resources in SPATIAL_RESOURCE_TEST_RANGE:
         env_args = dict(allow_rejection=True, mean_service_holding_time=25, topology=DEFAULT_TOPOLOGY, 
                             seed=SEED,load=LOAD, episode_length=EPISODE_LENGTH, 
                             num_spectrum_resources=NUM_SPECTRUM_RESOURCES, 
