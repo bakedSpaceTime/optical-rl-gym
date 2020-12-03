@@ -23,11 +23,14 @@ EPISODES = 10
 EPISODE_LENGTH = 1000 ########
 NUM_SPATIAL_RESOURCES = 5
 NUM_SPECTRUM_RESOURCES = 64
-SPATIAL_RESOURCE_TEST_RANGE = range(3, 10) # Increase to range(3, 15) 
-LOAD_TEST_RANGE = range(100, 1500, 100) # Increase to range(400, 2700, 200) -> keeps same number of data points
+# SPATIAL_RESOURCE_TEST_RANGE = range(3, 10) # Increase to range(3, 15) 
+SPATIAL_RESOURCE_TEST_RANGE = range(5, 15) # Increase to range(3, 15) 
+# LOAD_TEST_RANGE = range(100, 1500, 100) # Increase to range(400, 2700, 200) -> keeps same number of data points
+LOAD_TEST_RANGE = range(400, 2700, 200) # Increase to range(400, 2700, 200) -> keeps same number of data points
 TOPOLOGY_FILE_NAMES = {
-    'default': '../examples/topologies/nsfnet_chen_eon_5-paths.h5',
-    'germany': '../examples/topologies/germany50_eon_gnpy_5-paths.h5',
+    'nsfnet': '../examples/topologies/nsfnet_chen_eon_5-paths.h5',
+    'germany-50': '../examples/topologies/germany50_eon_gnpy_5-paths.h5',
+    'geant': '../examples/topologies/geant_5-paths.h5',
 }
 
 with open(TOPOLOGY_FILE_NAMES['default'], 'rb') as f:
