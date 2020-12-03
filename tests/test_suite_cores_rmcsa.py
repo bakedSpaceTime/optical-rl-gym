@@ -20,7 +20,7 @@ DEFAULT_OUT_FILE = f'outdata-{str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))}
 LOAD = 450
 SEED = 20
 EPISODES = 10
-EPISODE_LENGTH = 1000 ########
+EPISODE_LENGTH = 1 ########
 NUM_SPATIAL_RESOURCES = 5
 NUM_SPECTRUM_RESOURCES = 64
 # SPATIAL_RESOURCE_TEST_RANGE = range(3, 10) # Increase to range(3, 15) 
@@ -33,7 +33,7 @@ TOPOLOGY_FILE_NAMES = {
     'geant': '../examples/topologies/geant_5-paths.h5',
 }
 
-with open(TOPOLOGY_FILE_NAMES['default'], 'rb') as f:
+with open(TOPOLOGY_FILE_NAMES['nsfnet'], 'rb') as f:
     DEFAULT_TOPOLOGY = pickle.load(f)
 
 def run_test(env_args, core_alloc_algorithm, test_variable, **kwargs):
