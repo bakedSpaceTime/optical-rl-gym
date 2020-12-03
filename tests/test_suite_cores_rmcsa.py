@@ -20,13 +20,14 @@ DEFAULT_OUT_FILE = f'outdata-{str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))}
 LOAD = 450
 SEED = 20
 EPISODES = 10
-EPISODE_LENGTH = 1 ########
+EPISODE_LENGTH = 1000 ########
 NUM_SPATIAL_RESOURCES = 5
 NUM_SPECTRUM_RESOURCES = 64
 # SPATIAL_RESOURCE_TEST_RANGE = range(3, 10) # Increase to range(3, 15) 
 SPATIAL_RESOURCE_TEST_RANGE = range(5, 15) # Increase to range(3, 15) 
 # LOAD_TEST_RANGE = range(100, 1500, 100) # Increase to range(400, 2700, 200) -> keeps same number of data points
-LOAD_TEST_RANGE = range(400, 2700, 200) # Increase to range(400, 2700, 200) -> keeps same number of data points
+# LOAD_TEST_RANGE = range(400, 2700, 200) # Increase to range(400, 2700, 200) -> keeps same number of data points
+LOAD_TEST_RANGE = range(100, 501, 50)
 TOPOLOGY_FILE_NAMES = {
     'nsfnet': '../examples/topologies/nsfnet_chen_eon_5-paths.h5',
     'germany-50': '../examples/topologies/germany50_eon_gnpy_5-paths.h5',
@@ -140,6 +141,27 @@ def alter_load(core_alloc_algorithm):
         run_test(env_args, core_alloc_algorithm, test_var, topology_name='default',
             load=load, num_spatial_resources=NUM_SPATIAL_RESOURCES)
 
+def alter_load_topology(core_alloc_algorithm):
+    test_var = 'Load & Topology'
+    with open(DEFAULT_OUT_FILE, 'r') as f:
+        file_data = json.load(f)
+    file_data[core_alloc_algorithm][test_var] = {}
+    with open(DEFAULT_OUT_FILE, 'w') as f:
+        json.dump(file_data, f, indent=4)
+
+    for top_name, file_name in TOPOLOGY_FILE_NAMES.items():
+        with open(file_name, 'rb') as f:
+            topology = pickle.load(f)
+
+        for load in LOAD_TEST_RANGE:
+            env_args = dict(allow_rejection=True, mean_service_holding_time=25, topology=topology, 
+                                seed=SEED,load=load, episode_length=EPISODE_LENGTH, 
+                                num_spectrum_resources=NUM_SPECTRUM_RESOURCES, 
+                                num_spatial_resources=NUM_SPATIAL_RESOURCES
+                            )
+            run_test(env_args, core_alloc_algorithm, test_var, topology_name=top_name,
+                load=load, num_spatial_resources=NUM_SPATIAL_RESOURCES)
+
 if __name__ == "__main__":
     if not os.path.exists(DEFAULT_OUT_FILE):
         with open(DEFAULT_OUT_FILE, 'w') as f:
@@ -148,9 +170,10 @@ if __name__ == "__main__":
 
     for core_alloc_algorithm in CoreAllocation.HEURISTIC_NAMES:
 
-        alter_spatial_resources(core_alloc_algorithm)
-        alter_topology(core_alloc_algorithm)
-        alter_load(core_alloc_algorithm)
+        # alter_spatial_resources(core_alloc_algorithm)
+        # alter_topology(core_alloc_algorithm)
+        # alter_load(core_alloc_algorithm)
+        alter_load_topology(core_alloc_algorithm)
     
     with open(DEFAULT_OUT_FILE, 'r') as f:
         data = json.load(f)
