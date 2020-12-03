@@ -1,5 +1,5 @@
 from optical_rl_gym.utils import Path
-from optical_rl_gym.envs.rmcsa_env import RMCSAEnv
+from optical_rl_gym.envs.rmcsa_env import RMCSAEnv, shortest_available_first_core_first_fit
 
 
 class CoreAllocation():
@@ -10,9 +10,10 @@ class CoreAllocation():
 
     HEURISTIC_NAMES = [
         "round-robin",
-        "slot-based-round-robin",
+        # "slot-based-round-robin",
         "slot-based-round-robin2",
         "slot-based",
+        "SFCFF",
     ]
 
     def __init__(self, env: RMCSAEnv, heuristic:str):
@@ -29,6 +30,7 @@ class CoreAllocation():
             "slot-based-round-robin": self.slot_based_round_robin,
             "slot-based-round-robin2": self.slot_based_round_robin2,
             "slot-based": self.slot_based,
+            "SFCFF": shortest_available_first_core_first_fit,
         }
 
         if heuristic not in self.HEURISTICS.keys():
